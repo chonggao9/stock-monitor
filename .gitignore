@@ -1,0 +1,16 @@
+# 运行时数据库文件与缓存
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db-journal
+data/*.json
+
+# 环境变量敏感配置
+.env
+.env.local
+
+# 日志与系统文件
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

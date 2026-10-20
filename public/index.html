@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A股智能监控与情报代理</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 顶栏导航 -->
+    <header class="top-header">
+      <div class="logo">
+        <span class="icon">📈</span>
+        <h1>A股智能监控代理</h1>
+        <span class="badge">SQLite+AI</span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="stocks">股票管理</button>
+        <button class="nav-btn" data-tab="timeline">事件时间线</button>
+        <button class="nav-btn" data-tab="detail">个股详情</button>
+        <button class="nav-btn" data-tab="compensate">数据补偿与状态</button>
+        <button class="nav-btn" data-tab="chat">AI 对话舱</button>
+      </nav>
+      <div class="auth-bar">
+        <span id="authStatusText" class="auth-text">未鉴权</span>
+        <button id="setTokenBtn" class="btn-sm">设置密钥</button>
+      </div>
+    </header>
+
+    <!-- 主视口 -->
+    <main class="main-content">
+      <!-- 视图1: 股票管理 -->
+      <section id="view-stocks" class="view-panel active">
+        <div class="panel-header">
+          <h2>监控标的管理</h2>
+          <button id="openAddStockModalBtn" class="btn-primary">+ 添加监控标的</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>状态</th>
+                <th>代码</th>
+                <th>名称</th>
+                <th>市场</th>
+                <th>备注</th>
+                <th>更新时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="stocksTableBody">
+              <tr><td colspan="7" class="loading-cell">正在加载标的列表...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 视图2: 事件时间线 -->
+      <section id="view-timeline" class="view-panel">
+        <div class="panel-header">
+          <h2>事件时间线</h2>
+          <div class="filter-group">
+            <select id="eventStockFilter"><option value="">全部股票</option></select>
+            <select id="eventLevelFilter">
+              <option value="">全部级别</option>
+              <option value="红">红 (高风险/异动)</option>
+              <option value="黄">黄 (重点关注)</option>
+              <option value="绿">绿 (常规披露)</option>
+            </select>
+            <button id="refreshEventsBtn" class="btn-secondary">刷新</button>
+          </div>
+        </div>
+        <div id="eventsTimelineContainer" class="timeline-container">
+          <!-- 动态渲染事件卡片 -->
+        </div>
+      </section>
+
+      <!-- 视图3: 个股详情与轻量走势 -->
+      <section id="view-detail" class="view-panel">
+        <div class="panel-header">
+          <h2>个股深度看板</h2>
+          <select id="detailStockSelect"></select>
+        </div>
+        <div class="stock-dashboard">
+          <div id="quoteSummaryCard" class="card summary-card">
+            <div class="placeholder">请选择标的查看实时报价与估值</div>
+          </div>
+          <div class="charts-row">
+            <div class="card chart-card">
+              <h3>时序价格走势 (原生内联 SVG)</h3>
+              <div id="priceChartContainer" class="svg-container"></div>
+            </div>
+            <div class="card chart-card">
+              <h3>近30日主力资金净额 (万元)</h3>
+              <div id="fundFlowChartContainer" class="svg-container"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>近期公告与盘后交易 (龙虎榜 / 大宗 / 两融)</h3>
+            <div id="postMarketContainer" class="detail-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 视图4: 数据补偿与系统状态 -->
+      <section id="view-compensate" class="view-panel">
+        <div class="panel-header">
+          <h2>数据获取补偿与运行流水 (重点功能)</h2>
+        </div>
+        <div class="compensation-box card">
+          <h3>手动数据定向补偿 (Backfill)</h3>
+          <p class="desc">对历史未爬取成功、出现断点或网络遗漏的数据（公告、资金流向、盘后交易）进行按需回溯补齐并持久化入库。</p>
+          <div class="form-row">
+            <div class="form-item">
+              <label>目标标的:</label>
+              <select id="compStockSelect"><option value="">全部启用标的</option></select>
+            </div>
+            <div class="form-item">
+              <label>回溯天数:</label>
+              <select id="compDaysSelect">
+                <option value="7">最近 7 天</option>
+                <option value="15" selected>最近 15 天</option>
+                <option value="30">最近 30 天</option>
+                <option value="60">最近 60 天</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>补偿模块:</label>
+              <div class="checkbox-group">
+                <label><input type="checkbox" id="compAnn" checked> 公告历史</label>
+                <label><input type="checkbox" id="compFlow" checked> 资金流向</label>
+                <label><input type="checkbox" id="compPost" checked> 盘后数据(龙虎/两融/大宗)</label>
+              </div>
+            </div>
+            <div class="form-item action-item">
+              <button id="triggerCompBtn" class="btn-primary">启动后台补偿任务</button>
+            </div>
+          </div>
+          <div id="compStatusTip" class="tip-box"></div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h3>最近采集与补偿运行流水 (Pipeline Runs)</h3>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>批次 ID</th>
+                  <th>模式</th>
+                  <th>目标标的</th>
+                  <th>开始时间</th>
+                  <th>耗时</th>
+                  <th>状态</th>
+                  <th>摘要说明与异常源</th>
+                </tr>
+              </thead>
+              <tbody id="runsTableBody">
+                <tr><td colspan="7" class="loading-cell">正在加载运行记录...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 视图5: AI 对话舱 -->
+      <section id="view-chat" class="view-panel">
+        <div class="chat-container">
+          <!-- 会话侧边栏 -->
+          <div class="chat-sidebar card">
+            <div class="sidebar-header">
+              <h3>会话列表</h3>
+              <button id="newConvBtn" class="btn-sm">+ 新建</button>
+            </div>
+            <div id="convList" class="conv-list"></div>
+          </div>
+          <!-- 消息主屏 -->
+          <div class="chat-main card">
+            <div class="chat-header">
+              <span id="currentConvTitle">请选择或新建会话</span>
+              <span id="currentConvMeta" class="meta-tag"></span>
+            </div>
+            <div id="messagesArea" class="messages-area">
+              <div class="welcome-box">
+                <p>👋 欢迎使用 A 股监控 AI 对话助手。</p>
+                <p>助手将自动注入目标股票的<strong>最新报价、近5日主力资金、近7天事件与最新公告</strong>，基于客观数据事实回答，拒绝虚假臆测。</p>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <textarea id="chatInput" placeholder="输入你想咨询的股票情况，例如：'分析一下近期主力资金异动与风险点'..." rows="2"></textarea>
+              <button id="sendChatBtn" class="btn-primary">发送</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Token 输入模态弹窗 -->
+    <div id="tokenModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>设置系统访问密钥 (AUTH_TOKEN)</h3>
+        <p class="desc">所有数据接口受严格 Header 鉴权保护。密钥将保存在当前浏览器本地，并在请求头中通过 <code>Authorization: Bearer &lt;TOKEN&gt;</code> 传输。</p>
+        <input type="password" id="tokenInput" placeholder="请输入服务端配置的 AUTH_TOKEN">
+        <div class="modal-actions">
+          <button id="saveTokenBtn" class="btn-primary">保存凭证</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加股票模态弹窗 -->
+    <div id="addStockModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>添加新监控标的</h3>
+        <p class="desc">只需输入 6 位股票代码，系统将自动识别公司名称与交易市场，并立即启动首轮历史数据补齐。</p>
+        <div class="form-field">
+          <label>股票代码 (6位数字):</label>
+          <input type="text" id="newStockCode" placeholder="如: 600519、000001、300750" maxlength="6">
+        </div>
+        <div class="form-field">
+          <label>备注说明 (可选):</label>
+          <input type="text" id="newStockNotes" placeholder="如: 核心白酒观察 / 逢低建仓">
+        </div>
+        <div id="addStockLoadingTip" style="font-size:0.85rem;color:var(--accent);margin-bottom:0.75rem;display:none;">
+          ⏳ 正在联网查询公司名称并初始化近30天时序数据，请稍候...
+        </div>
+        <div class="modal-actions">
+          <button id="cancelAddStockBtn" class="btn-secondary">取消</button>
+          <button id="confirmAddStockBtn" class="btn-primary">确认添加并初始化</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

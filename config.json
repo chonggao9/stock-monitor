@@ -1,0 +1,33 @@
+{
+  "stocks": [
+    { "code": "600703", "name": "三安光电", "market": "sh" },
+    { "code": "300002", "name": "神州泰岳", "market": "sz" },
+    { "code": "603516", "name": "淳中科技", "market": "sh" },
+    { "code": "300751", "name": "迈为股份", "market": "sz" },
+    { "code": "601888", "name": "中国中免", "market": "sh" }
+  ],
+  "thresholds": {
+    "fast_move_pct": 3,
+    "volume_multiple": 3,
+    "volume_ratio": 2,
+    "main_net_outflow_ratio": 15
+  },
+  "holidays": [
+    "2026-10-01", "2026-10-02", "2026-10-05", "2026-10-06", "2026-10-07"
+  ],
+  "llm": {
+    "enabled": false,
+    "endpoint": "",
+    "apiKey": "",
+    "model": "",
+    "timeoutMs": 30000
+  },
+  "dingtalk": {
+    "enabled": false,
+    "webhook": "",
+    "secret": "",
+    "pushLevel": "黄"
+  },
+  "stateFile": "data/state.json",
+  "lookbackDays": 3
+}

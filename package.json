@@ -1,0 +1,19 @@
+{
+  "name": "a-stock-monitor",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "A股智能监控代理：SQLite存储、Web界面、数据定向补偿与AI对话研判，纯原生零外部依赖",
+  "scripts": {
+    "test": "node --no-warnings --test test/*.test.mjs",
+    "db:init": "node --no-warnings src/db/init.mjs",
+    "web": "node --no-warnings src/server.mjs",
+    "start": "node --no-warnings src/index.mjs",
+    "catchup": "node --no-warnings src/index.mjs --mode catchup",
+    "realtime": "node --no-warnings src/index.mjs --mode realtime",
+    "compensate": "node --no-warnings src/compensate.mjs"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {}
+}
