@@ -229,6 +229,28 @@
         </div>
       </div>
     </div>
+
+    <!-- 新建 AI 会话模态弹窗 -->
+    <div id="newConvModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>新建 AI 研讨会话</h3>
+        <p class="desc">从监控股票池中选择要研讨的标的，系统将自动关联该标的的实时行情、主力资金与公告事实；亦可选择全局综合研讨。</p>
+        <div class="form-field">
+          <label>研讨标的 (从股票池选择):</label>
+          <select id="newConvStockSelect">
+            <option value="">🌐 全局综合研讨 (不绑定特定个股)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>会话标题 (可选):</label>
+          <input type="text" id="newConvTitleInput" placeholder="留空将自动根据所选标的生成标题">
+        </div>
+        <div class="modal-actions">
+          <button id="cancelNewConvBtn" class="btn-secondary">取消</button>
+          <button id="confirmNewConvBtn" class="btn-primary">创建会话</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/app.js"></script>

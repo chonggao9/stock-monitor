@@ -285,7 +285,8 @@ export function startServer({ port = 3000, host = '127.0.0.1' } = {}) {
       if (pathname === '/api/conversations' && req.method === 'POST') {
         const body = await parseJsonBody(req);
         const id = 'conv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-        const title = body.title || (body.stockCode ? `关于 ${body.stockCode} 的研讨` : '综合研判对话');
+        const targetStock = body.stockCode ? repo.getStock(body.stockCode) : null;
+        const title = body.title || (targetStock ? `关于 ${targetStock.name} (${targetStock.code}) 的深度研判` : '全局综合宏观研判');
         const conv = repo.createConversation(id, title, body.stockCode || null);
         return sendJson(res, 200, { ok: true, data: conv });
       }

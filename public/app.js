@@ -152,13 +152,17 @@ window.deleteStock = async (code, name) => {
 };
 
 function updateStockSelects(stocks) {
-  const selects = ['eventStockFilter', 'detailStockSelect', 'compStockSelect'];
+  const selects = ['eventStockFilter', 'detailStockSelect', 'compStockSelect', 'newConvStockSelect'];
   selects.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     const curVal = el.value;
-    const isFilter = id === 'eventStockFilter' || id === 'compStockSelect';
-    let html = isFilter ? '<option value="">全部标的</option>' : '';
+    let html = '';
+    if (id === 'eventStockFilter' || id === 'compStockSelect') {
+      html = '<option value="">全部标的</option>';
+    } else if (id === 'newConvStockSelect') {
+      html = '<option value="">🌐 全局综合研讨 (不绑定特定个股)</option>';
+    }
     html += stocks.map((s) => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('');
     el.innerHTML = html;
     if (curVal) el.value = curVal;
@@ -561,21 +565,41 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
 }
 
-document.getElementById('newConvBtn').addEventListener('click', async () => {
-  const stockCode = prompt('如需绑定特定标的，请输入股票代码（直接留空则为全局综合对话）：');
-  if (stockCode === null) return;
+// 新建会话弹窗交互
+document.getElementById('newConvBtn').addEventListener('click', () => {
+  if (cachedStocks.length > 0) updateStockSelects(cachedStocks);
+  document.getElementById('newConvTitleInput').value = '';
+  document.getElementById('newConvModal').classList.add('active');
+});
+
+document.getElementById('cancelNewConvBtn').addEventListener('click', () => {
+  document.getElementById('newConvModal').classList.remove('active');
+});
+
+document.getElementById('confirmNewConvBtn').addEventListener('click', async () => {
+  const stockCode = document.getElementById('newConvStockSelect').value;
+  const customTitle = document.getElementById('newConvTitleInput').value.trim();
+  const btn = document.getElementById('confirmNewConvBtn');
+  btn.disabled = true;
+
   try {
     const res = await apiFetch('/api/conversations', {
       method: 'POST',
-      body: JSON.stringify({ stockCode: stockCode.trim() || null }),
+      body: JSON.stringify({
+        stockCode: stockCode || null,
+        title: customTitle || null,
+      }),
     });
     if (res.ok) {
+      document.getElementById('newConvModal').classList.remove('active');
       currentConvId = res.data.id;
-      loadConversations();
+      await loadConversations();
       window.selectConversation(currentConvId);
     }
   } catch (err) {
     alert(`新建会话失败: ${err.message}`);
+  } finally {
+    btn.disabled = false;
   }
 });
 
