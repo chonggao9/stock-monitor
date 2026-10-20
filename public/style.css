@@ -347,6 +347,83 @@ input:checked + .slider:before { transform: translateX(16px); }
   flex-wrap: wrap;
   gap: 1.5rem;
   align-items: flex-end;
+/* ---------------- 全局统一现代深色表单与选择控件 ---------------- */
+select, input[type="text"], input[type="password"], textarea {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: var(--text-main);
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+select:hover, input[type="text"]:hover, input[type="password"]:hover, textarea:hover {
+  border-color: #475569;
+}
+
+select:focus, input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+  background-color: #0f172a;
+}
+
+/* 现代化自定义 Select：去除原生系统粗糙箭头，引入科技感小箭头 */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+select:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338bdf8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* 强制下拉列表选项为深色科技背景，彻底消除白底刺眼问题 */
+select option {
+  background-color: #1e293b;
+  color: #f8fafc;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.875rem;
+}
+
+select option:checked {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+select option:hover {
+  background-color: #334155;
+}
+
+/* 筛选栏容器协同 */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.filter-group select {
+  min-width: 140px;
+}
+.filter-group button {
+  height: 35px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
   margin-top: 1rem;
 }
 .form-item {
@@ -357,19 +434,6 @@ input:checked + .slider:before { transform: translateX(16px); }
 .form-item label {
   font-size: 0.85rem;
   color: var(--text-muted);
-}
-.form-item select, .form-item input[type="text"], .form-field input, .form-field select, #chatInput {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 0.9rem;
-}
-.form-item select:focus, .form-item input:focus, #chatInput:focus {
-  outline: none;
-  border-color: var(--accent);
 }
 .checkbox-group {
   display: flex;
@@ -508,7 +572,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 .modal-card h3 { margin-bottom: 0.5rem; }
 .modal-card .desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
-.modal-card input[type="password"], .modal-card input[type="text"] {
+.modal-card input[type="password"], .modal-card input[type="text"], .modal-card select {
   width: 100%;
   margin-bottom: 1rem;
 }
